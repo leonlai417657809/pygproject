@@ -1,11 +1,9 @@
 package com.pinyougou.pojo;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 
+//映射数据库表；name指定数据库表名称
 @Table(name = "tb_brand")
 public class TbBrand implements Serializable {
 
@@ -41,5 +39,14 @@ public class TbBrand implements Serializable {
 
     public void setFirstChar(String firstChar) {
         this.firstChar = firstChar;
+    }
+
+    @Override
+    public String toString() {
+        return "TbBrand{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", firstChar='" + firstChar + '\'' +
+                '}';
     }
 }
