@@ -14,7 +14,9 @@ var app = new Vue({
         //选择的品牌id
         ids:[],
         //搜索条件对象
-        searchEntity:{}
+        searchEntity:{},
+        //被选中对象
+        checked:false
     },
     methods:{
         searchList:function (pageNum) {
@@ -78,9 +80,37 @@ var app = new Vue({
                     }
                 });
             }
+        },
+
+        //全选功能
+        checkedAll:function () {
+            //实现反选
+            if(this.checked){
+                this.ids = [];
+             //实现反选
+            } else{
+                this.ids = [];
+                this.entityList.forEach((item)=>{
+                    this.ids.push(item.id);
+                });
+            }
         }
 
     },
+
+    watch:{
+        ids:{
+            handler:function (val,oldVal) {
+                if(this.ids.length === this.entityList.length){
+                    this.checked = true;
+                }else{
+                    this.checked = false;
+                }
+            },
+            deep:true
+        }
+    },
+
     created(){
         /*axios.get("../brand/findAll.do").then(function (response) {
             //response里面的属性有：data,status,statusText,headers,config

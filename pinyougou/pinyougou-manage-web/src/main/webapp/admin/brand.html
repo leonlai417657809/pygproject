@@ -52,7 +52,8 @@
 			                      <thead>
 			                          <tr>
 			                              <th class="" style="padding-right:0px">
-			                                  <input id="selall" type="checkbox" class="icheckbox_square-blue">
+											  <!--给全选按钮绑定v-mode变量，值为true时就是选中状态，绑定点击事件，执行全选和反选操作-->
+			                                  <input id="selall" type="checkbox" class="icheckbox_square-blue" v-model="checked" @click="checkedAll">
 			                              </th> 
 										  <th class="sorting_asc">品牌ID</th>
 									      <th class="sorting">品牌名称</th>									      
@@ -61,8 +62,9 @@
 			                          </tr>
 			                      </thead>
 			                      <tbody>
-			                          <tr v-for="entity in entityList">
-			                              <td><input :value="entity.id" v-model="ids" type="checkbox" ></td>
+			                          <tr v-for="entity in entityList":key="entity.id">
+										  <!--给每个复选按钮绑定同一个v-mode数组变量，数组里面有相应的value就被选中-->
+			                              <td><input :value="entity.id" v-model="ids":key="entity.id" type="checkbox" ></td>{{entity.value}}
 				                          <td>{{entity.id}}</td>
 									      <td>{{entity.name}}</td>
 		                                  <td>{{entity.firstChar}}</td>
