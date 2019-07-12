@@ -41,8 +41,8 @@
                             </div>
                             <div class="box-tools pull-right">
                                 <div class="has-feedback">
-									品牌名称：<input v-model="searchEntity.name"> 品牌首字母：<input v-model="searchEntity.firstChar">
-									<button class="btn btn-default" @click="searchList(1)">查询</button>
+							           品牌名称：<input v-model="searchEntity.name"> 品牌首字母：<input v-model="searchEntity.firstChar">
+                                    <button class="btn btn-default" @click="searchList(1)">查询</button>
                                 </div>
                             </div>
                             <!--工具栏/-->
@@ -52,8 +52,7 @@
 			                      <thead>
 			                          <tr>
 			                              <th class="" style="padding-right:0px">
-											  <!--给全选按钮绑定v-mode变量，值为true时就是选中状态，绑定点击事件，执行全选和反选操作-->
-			                                  <input id="selall" type="checkbox" class="icheckbox_square-blue" v-model="checked" @click="checkedAll">
+			                                  <input @click="selectAll()" v-model="checkAll" id="selall" type="checkbox" class="icheckbox_square-blue">
 			                              </th> 
 										  <th class="sorting_asc">品牌ID</th>
 									      <th class="sorting">品牌名称</th>									      
@@ -62,9 +61,8 @@
 			                          </tr>
 			                      </thead>
 			                      <tbody>
-			                          <tr v-for="entity in entityList":key="entity.id">
-										  <!--给每个复选按钮绑定同一个v-mode数组变量，数组里面有相应的value就被选中-->
-			                              <td><input :value="entity.id" v-model="ids":key="entity.id" type="checkbox" ></td>{{entity.value}}
+			                          <tr v-for="entity in entityList">
+			                              <td><input :value="entity.id" v-model="ids" type="checkbox" ></td>
 				                          <td>{{entity.id}}</td>
 									      <td>{{entity.name}}</td>
 		                                  <td>{{entity.firstChar}}</td>
@@ -98,10 +96,9 @@
 		</div>
 		<div class="modal-body">		
 			<table class="table table-bordered table-striped"  width="800px">
-				{{entity.name}}
 		      	<tr>
 		      		<td>品牌名称</td>
-		      		<td><input v-model="entity.name"  class="form-control" placeholder="品牌名称" >  </td>
+		      		<td><input v-model="entity.name" class="form-control" placeholder="品牌名称" >  </td>
 		      	</tr>		      	
 		      	<tr>
 		      		<td>首字母</td>
