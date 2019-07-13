@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.pinyougou.pojo.TbSeller;
 import com.pinyougou.sellergoods.service.SellerService;
 import com.pinyougou.vo.Result;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/seller")
@@ -12,7 +13,8 @@ import org.springframework.web.bind.annotation.*;
 public class SellerController {
 
     //如果超过1秒则会重发2次
-    @Reference
+
+    @Reference(timeout = 30000)
     private SellerService sellerService;
 
     /**
@@ -23,6 +25,10 @@ public class SellerController {
     @PostMapping("/add")
     public Result add(@RequestBody TbSeller seller){
         try {
+            //对密码明文加密
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            seller.setPassword(passwordEncoder.encode(seller.getPassword()));
+
             sellerService.add(seller);
 
             return Result.ok("新增成功");

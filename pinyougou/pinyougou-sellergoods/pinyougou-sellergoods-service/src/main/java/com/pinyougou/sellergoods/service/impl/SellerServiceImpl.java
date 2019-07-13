@@ -29,10 +29,19 @@ public class SellerServiceImpl extends BaseServiceImpl<TbSeller> implements Sell
         //创建查询条件对象
         Example.Criteria criteria = example.createCriteria();
 
-        //模糊查询
-        /**if (StringUtils.isNotBlank(seller.getProperty())) {
-            criteria.andLike("property", "%" + seller.getProperty() + "%");
-        }*/
+        //状态
+        if (StringUtils.isNotBlank(seller.getStatus())) {
+            criteria.andEqualTo("status", seller.getStatus());
+        }
+
+        //公司名模糊查询
+        if (StringUtils.isNotBlank(seller.getName())) {
+            criteria.andLike("name", "%" + seller.getName() + "%");
+        }
+        //店铺名模糊查询
+        if (StringUtils.isNotBlank(seller.getNickName())) {
+            criteria.andLike("nickName", "%" + seller.getNickName() + "%");
+        }
 
         List<TbSeller> list = sellerMapper.selectByExample(example);
         return new PageInfo<>(list);

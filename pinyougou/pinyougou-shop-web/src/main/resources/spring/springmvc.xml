@@ -20,6 +20,7 @@ http://www.springframework.org/schema/context/spring-context.xsd">
             </bean>
         </mvc:message-converters>
     </mvc:annotation-driven>
+    <mvc:default-servlet-handler/>
     <context:component-scan base-package="com.pinyougou.shop.controller"/>
     <!--  引用 dubbo  服务  -->
     <dubbo:application name="pinyougou-shop-web" >
