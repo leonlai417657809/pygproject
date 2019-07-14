@@ -3,6 +3,7 @@ package com.pinyougou.sellergoods.service;
 import com.github.pagehelper.PageInfo;
 import com.pinyougou.pojo.TbGoods;
 import com.pinyougou.service.BaseService;
+import com.pinyougou.vo.Goods;
 
 import java.util.List;
 
@@ -16,4 +17,9 @@ public interface GoodsService extends BaseService<TbGoods> {
      */
     PageInfo<TbGoods> search(Integer pageNum, Integer pageSize, TbGoods goods);
 
+    /**
+     * 新增
+     * @param goods 商品vo（商品基本、描述、sku列表）
+     */
+    void addGoods(Goods goods);
 }

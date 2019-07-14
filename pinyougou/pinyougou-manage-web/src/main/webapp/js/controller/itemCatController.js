@@ -28,6 +28,7 @@ var app = new Vue({
     },
     methods: {
         //选择分类
+        //itemCat(java类TbItemCat)商品分类含有属性name
         selectList: function(grade, itemCat){
             this.grade = grade;
 
@@ -44,7 +45,7 @@ var app = new Vue({
                     this.entity_3 = itemCat;
             }
 
-            //设置父分类id
+            //设置父分类id，从前端传来的entity的parentId设置成当前实体itemCat的id
             this.entity.parentId = itemCat.id;
 
             //查询当前父分类的子分类列表
