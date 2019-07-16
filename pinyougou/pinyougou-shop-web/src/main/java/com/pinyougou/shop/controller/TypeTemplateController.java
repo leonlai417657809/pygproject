@@ -2,32 +2,30 @@ package com.pinyougou.shop.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.github.pagehelper.PageInfo;
-import com.pinyougou.pojo.TbGoods;
-import com.pinyougou.sellergoods.service.GoodsService;
-import com.pinyougou.vo.Goods;
+import com.pinyougou.pojo.TbTypeTemplate;
+import com.pinyougou.sellergoods.service.TypeTemplateService;
 import com.pinyougou.vo.Result;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/goods")
+import java.util.List;
+import java.util.Map;
+
+@RequestMapping("/typeTemplate")
 @RestController
-public class GoodsController {
+public class TypeTemplateController {
 
     @Reference
-    private GoodsService goodsService;
+    private TypeTemplateService typeTemplateService;
 
     /**
      * 新增
-     * @param goods 商品vo（商品基本、描述、sku列表）
+     * @param typeTemplate 实体
      * @return 操作结果
      */
     @PostMapping("/add")
-    public Result add(@RequestBody Goods goods){
+    public Result add(@RequestBody TbTypeTemplate typeTemplate){
         try {
-            //设置商家
-            String sellerId = SecurityContextHolder.getContext().getAuthentication().getName();
-            goods.getGoods().setSellerId(sellerId);
-            goodsService.addGoods(goods);
+            typeTemplateService.add(typeTemplate);
 
             return Result.ok("新增成功");
         } catch (Exception e) {
@@ -42,19 +40,19 @@ public class GoodsController {
      * @return 实体
      */
     @GetMapping("/findOne/{id}")
-    public TbGoods findOne(@PathVariable Long id){
-        return goodsService.findOne(id);
+    public TbTypeTemplate findOne(@PathVariable Long id){
+        return typeTemplateService.findOne(id);
     }
 
     /**
      * 修改
-     * @param goods 实体
+     * @param typeTemplate 实体
      * @return 操作结果
      */
     @PostMapping("/update")
-    public Result update(@RequestBody TbGoods goods){
+    public Result update(@RequestBody TbTypeTemplate typeTemplate){
         try {
-            goodsService.update(goods);
+            typeTemplateService.update(typeTemplate);
             return Result.ok("修改成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -70,7 +68,7 @@ public class GoodsController {
     @GetMapping("/delete")
     public Result delete(Long[] ids){
         try {
-            goodsService.deleteByIds(ids);
+            typeTemplateService.deleteByIds(ids);
             return Result.ok("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,14 +80,27 @@ public class GoodsController {
      * 根据条件搜索
      * @param pageNum 页号
      * @param pageSize 页面大小
-     * @param goods 搜索条件
+     * @param typeTemplate 搜索条件
      * @return 分页信息
      */
     @PostMapping("/search")
-    public PageInfo<TbGoods> search(@RequestParam(value = "pageNum", required = false, defaultValue = "1") Integer pageNum,
+    public PageInfo<TbTypeTemplate> search(@RequestParam(value = "pageNum", required = false, defaultValue = "1") Integer pageNum,
                              @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
-                           @RequestBody TbGoods goods) {
-        return goodsService.search(pageNum, pageSize, goods);
+                           @RequestBody TbTypeTemplate typeTemplate) {
+        return typeTemplateService.search(pageNum, pageSize, typeTemplate);
     }
 
+    /**
+     * 根据分类模版id查询规格及其选项；数据结构如下：
+     * [
+     *     {"id":27,"text":"网络", "options":[{"id":1,"optionName":"移动3G"}...]},
+     *     {"id":32,"text":"机身内存", "options":[{"id":2,"optionName":"16G"}...]}
+     * ]
+     * @param id 分类模版id
+     * @return 规格及其选项
+     */
+    @GetMapping("/findSpecList")
+    public List<Map> findSpecList(Long id){
+        return typeTemplateService.findSpecList(id);
+    }
 }
