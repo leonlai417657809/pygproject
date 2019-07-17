@@ -27,6 +27,9 @@ public class GoodsController {
             //设置商家
             String sellerId = SecurityContextHolder.getContext().getAuthentication().getName();
             goods.getGoods().setSellerId(sellerId);
+
+            //设置商品状态为：未审核
+            goods.getGoods().setAuditStatus("0");
             goodsService.addGoods(goods);
 
             return Result.ok("新增成功");
@@ -38,23 +41,31 @@ public class GoodsController {
 
     /**
      * 根据主键查询
-     * @param id 主键
-     * @return 实体
+     * @param id 主键；spu id
+     * @return 商品vo：基本、描述、sku列表
      */
     @GetMapping("/findOne/{id}")
-    public TbGoods findOne(@PathVariable Long id){
-        return goodsService.findOne(id);
+    public Goods findOne(@PathVariable Long id){
+        return goodsService.findGoodsById(id);
     }
 
     /**
      * 修改
-     * @param goods 实体
+     * @param goods 商品vo：基本、描述、sku列表
      * @return 操作结果
      */
     @PostMapping("/update")
-    public Result update(@RequestBody TbGoods goods){
+    public Result update(@RequestBody Goods goods){
         try {
-            goodsService.update(goods);
+            //老商品
+            TbGoods oldGoods = goodsService.findOne(goods.getGoods().getId());
+            //获取当前登录的商家
+            String sellerId = SecurityContextHolder.getContext().getAuthentication().getName();
+            if(!sellerId.equals(oldGoods.getSellerId())){
+                return Result.fail("操作非法");
+            }
+
+            goodsService.updateGoods(goods);
             return Result.ok("修改成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -89,7 +100,27 @@ public class GoodsController {
     public PageInfo<TbGoods> search(@RequestParam(value = "pageNum", required = false, defaultValue = "1") Integer pageNum,
                              @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
                            @RequestBody TbGoods goods) {
+        //设置当前登录用户作为商家条件查询
+        String sellerId = SecurityContextHolder.getContext().getAuthentication().getName();
+        goods.setSellerId(sellerId);
+
         return goodsService.search(pageNum, pageSize, goods);
     }
 
+    /**
+     * 批量更新商品spu的状态
+     * @param status 商品审核状态
+     * @param ids 商品spu id数组
+     * @return 操作结果
+     */
+    @GetMapping("/updateStatus")
+    public Result updateStatus(String status,Long[] ids){
+        try {
+            goodsService.updateStatus(status,ids);
+            return Result.ok("提交更新成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Result.fail("提交更新失败");
+    }
 }

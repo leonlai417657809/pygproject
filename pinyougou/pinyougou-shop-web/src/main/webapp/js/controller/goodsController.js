@@ -275,7 +275,7 @@ var goodsControllerMixin = {
                     editor.html(app.entity.goodsDesc.introduction);
 
                     //备份模板ID和扩展属性值
-                    app.typeTemplateIdBak=app.entity.typeTemplateId;
+                    app.typeTemplateIdBak=app.entity.goods.typeTemplateId;
                     app.customAttributeItemsBak=JSON.parse( app.entity.goodsDesc.customAttributeItems );
 
                     //转换商品图片列表

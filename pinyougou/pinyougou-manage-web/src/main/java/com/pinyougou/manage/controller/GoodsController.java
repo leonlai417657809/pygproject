@@ -4,7 +4,9 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.github.pagehelper.PageInfo;
 import com.pinyougou.pojo.TbGoods;
 import com.pinyougou.sellergoods.service.GoodsService;
+import com.pinyougou.vo.Goods;
 import com.pinyougou.vo.Result;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RequestMapping("/goods")
@@ -16,13 +18,19 @@ public class GoodsController {
 
     /**
      * 新增
-     * @param goods 实体
+     * @param goods 商品vo（商品基本、描述、sku列表）
      * @return 操作结果
      */
     @PostMapping("/add")
-    public Result add(@RequestBody TbGoods goods){
+    public Result add(@RequestBody Goods goods){
         try {
-            goodsService.add(goods);
+            //设置商家
+            String sellerId = SecurityContextHolder.getContext().getAuthentication().getName();
+            goods.getGoods().setSellerId(sellerId);
+
+            //设置商品状态为：未审核
+            goods.getGoods().setAuditStatus("0");
+            goodsService.addGoods(goods);
 
             return Result.ok("新增成功");
         } catch (Exception e) {
@@ -33,23 +41,31 @@ public class GoodsController {
 
     /**
      * 根据主键查询
-     * @param id 主键
-     * @return 实体
+     * @param id 主键；spu id
+     * @return 商品vo：基本、描述、sku列表
      */
     @GetMapping("/findOne/{id}")
-    public TbGoods findOne(@PathVariable Long id){
-        return goodsService.findOne(id);
+    public Goods findOne(@PathVariable Long id){
+        return goodsService.findGoodsById(id);
     }
 
     /**
      * 修改
-     * @param goods 实体
+     * @param goods 商品vo：基本、描述、sku列表
      * @return 操作结果
      */
     @PostMapping("/update")
-    public Result update(@RequestBody TbGoods goods){
+    public Result update(@RequestBody Goods goods){
         try {
-            goodsService.update(goods);
+            //老商品
+            TbGoods oldGoods = goodsService.findOne(goods.getGoods().getId());
+            //获取当前登录的商家
+            String sellerId = SecurityContextHolder.getContext().getAuthentication().getName();
+            if(!sellerId.equals(oldGoods.getSellerId())){
+                return Result.fail("操作非法");
+            }
+
+            goodsService.updateGoods(goods);
             return Result.ok("修改成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -65,7 +81,7 @@ public class GoodsController {
     @GetMapping("/delete")
     public Result delete(Long[] ids){
         try {
-            goodsService.deleteByIds(ids);
+            goodsService.deleteGoodsByIds(ids);
             return Result.ok("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -84,7 +100,24 @@ public class GoodsController {
     public PageInfo<TbGoods> search(@RequestParam(value = "pageNum", required = false, defaultValue = "1") Integer pageNum,
                              @RequestParam(value = "pageSize", required = false, defaultValue = "10") Integer pageSize,
                            @RequestBody TbGoods goods) {
+
         return goodsService.search(pageNum, pageSize, goods);
     }
 
+    /**
+     * 批量更新商品spu的状态
+     * @param status 商品审核状态
+     * @param ids 商品spu id数组
+     * @return 操作结果
+     */
+    @GetMapping("/updateStatus")
+    public Result updateStatus(String status,Long[] ids){
+        try {
+            goodsService.updateStatus(status,ids);
+            return Result.ok("提交更新成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Result.fail("提交更新失败");
+    }
 }

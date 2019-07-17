@@ -11,7 +11,7 @@ var app = new Vue({
         pageSize: 10,
         //当前页号
         pageNum: 1,
-        //实体
+        //实体，构造一个空的实体，用于封装后置于该实体中
         entity:{parentId:0},
         //二级分类
         entity_2:{},
@@ -45,7 +45,7 @@ var app = new Vue({
                     this.entity_3 = itemCat;
             }
 
-            //设置父分类id，从前端传来的entity的parentId设置成当前实体itemCat的id
+            //设置父分类id，data里面entity的parentId设置成当从前端传来的itemCat的id
             this.entity.parentId = itemCat.id;
 
             //查询当前父分类的子分类列表

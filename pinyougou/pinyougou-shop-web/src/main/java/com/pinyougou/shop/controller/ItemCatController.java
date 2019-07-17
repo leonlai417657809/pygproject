@@ -100,4 +100,13 @@ public class ItemCatController {
         param.setParentId(parentId);
         return itemCatService.findByWhere(param);
     }
+
+    /**
+     * 查询所有商品分类
+     * @return 分类列表
+     */
+    @GetMapping("/findAll")
+    public List<TbItemCat> findAll(){
+        return itemCatService.findAll();
+    }
 }

@@ -22,4 +22,30 @@ public interface GoodsService extends BaseService<TbGoods> {
      * @param goods 商品vo（商品基本、描述、sku列表）
      */
     void addGoods(Goods goods);
+
+    /**
+     * 根据主键查询
+     * @param id 主键；spu id
+     * @return 商品vo：基本、描述、sku列表
+     */
+    Goods findGoodsById(Long id);
+
+    /**
+     * 修改
+     * @param goods 商品vo：基本、描述、sku列表
+     */
+    void updateGoods(Goods goods);
+
+    /**
+     * 批量更新商品spu的状态
+     * @param status 商品审核状态
+     * @param ids 商品spu id数组
+     */
+    void updateStatus(String status, Long[] ids);
+
+    /**
+     * 根据主键数组批量逻辑删除
+     * @param ids 主键数组
+     */
+    void deleteGoodsByIds(Long[] ids);
 }

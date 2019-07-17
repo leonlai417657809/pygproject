@@ -12,12 +12,15 @@ import com.pinyougou.service.impl.BaseServiceImpl;
 import com.pinyougou.vo.Goods;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+@Transactional
 @Service
 public class GoodsServiceImpl extends BaseServiceImpl<TbGoods> implements GoodsService {
 
@@ -49,10 +52,23 @@ public class GoodsServiceImpl extends BaseServiceImpl<TbGoods> implements GoodsS
         //创建查询条件对象
         Example.Criteria criteria = example.createCriteria();
 
-        //模糊查询
-        /**if (StringUtils.isNotBlank(goods.getProperty())) {
-            criteria.andLike("property", "%" + goods.getProperty() + "%");
-        }*/
+        //查询非删除状态的数据
+        criteria.andNotEqualTo("isDelete",1);
+
+        //商家
+        if (StringUtils.isNotBlank(goods.getSellerId())) {
+            criteria.andEqualTo("sellerId", goods.getSellerId());
+        }
+
+        //审核状态
+        if (StringUtils.isNotBlank(goods.getAuditStatus())) {
+            criteria.andEqualTo("auditStatus", goods.getAuditStatus());
+        }
+
+        //商品名称模糊查询
+        if (StringUtils.isNotBlank(goods.getGoodsName())) {
+            criteria.andLike("goodsName", "%" + goods.getGoodsName() + "%");
+        }
 
         List<TbGoods> list = goodsMapper.selectByExample(example);
         return new PageInfo<>(list);
@@ -63,12 +79,106 @@ public class GoodsServiceImpl extends BaseServiceImpl<TbGoods> implements GoodsS
         //保存商品基本信息
         add(goods.getGoods());
 
+        //int i = 1/0;
+
         //保存商品描述信息
         goods.getGoodsDesc().setGoodsId(goods.getGoods().getId());
         goodsDescMapper.insertSelective(goods.getGoodsDesc());
 
         //保存商品sku列表信息
         saveItemList(goods);
+    }
+
+
+    @Override
+    public Goods findGoodsById(Long id) {
+        Goods goods =new Goods();
+
+        //根据spu id查询基本信息
+        goods.setGoods(findOne(id));
+
+        //根据spu id查询描述信息
+        goods.setGoodsDesc(goodsDescMapper.selectByPrimaryKey(id));
+
+        //根据spu id查询sku列表信息
+        //sql -> select * from tb_item where goods_id=?
+        TbItem item = new TbItem();
+        item.setGoodsId(id);
+        List<TbItem> itemList = itemMapper.select(item);
+
+        goods.setItemList(itemList);
+
+        return goods;
+    }
+
+    @Override
+    public void updateGoods(Goods goods) {
+
+
+        //- 更新基本信息
+        //如果修改了则需要重新审核，也就是修改审核状态为0
+        goods.getGoods().setAuditStatus("0");
+        goodsMapper.updateByPrimaryKeySelective(goods.getGoods());
+
+        //- 更新描述信息
+        goodsDescMapper.updateByPrimaryKeySelective(goods.getGoodsDesc());
+
+        //- 更新sku列表（先删除，再保存）
+        //根据商品spu id删除其对应的所有的sku
+        //DELETE FROM tb_item WHERE goods_id=?
+        TbItem tbItem = new TbItem();
+        tbItem.setGoodsId(goods.getGoods().getId());
+        itemMapper.delete(tbItem);
+
+        //保存sku
+        saveItemList(goods);
+    }
+
+    @Override
+    public void updateStatus(String status, Long[] ids) {
+        /**
+         * -- 根据商品spu id批量更新商品spu的状态为 审核中
+         * UPDATE tb_goods SET audit_status = '1' WHERE id IN (?,?...)
+         */
+        //要更新的数据
+        TbGoods goods = new TbGoods();
+        goods.setAuditStatus(status);
+
+        //查询条件
+        Example example = new Example(TbGoods.class);
+        example.createCriteria().andIn("id", Arrays.asList(ids));//property里面的id对应TbGoods.java类里面的属性id
+
+        //批量更新商品的审核状态
+        goodsMapper.updateByExampleSelective(goods,example);
+
+        //更新商品sku的启用状态
+        //sql -> update tb_item set status=? where goods_id in(?, ?,...)
+        TbItem tbItem = new TbItem();
+        //若前端传来审核通过:status为2
+        if("2".equals(status)){
+            //审核通过；sku需要启用
+            tbItem.setStatus("1");
+        }else{
+            //审核不通过；sku不需要启用
+            tbItem.setStatus("0");
+        }
+        Example itemExample = new Example(TbItem.class);
+        itemExample.createCriteria().andIn("goodsId",Arrays.asList(ids));
+
+        itemMapper.updateByExampleSelective(tbItem,itemExample);
+    }
+
+    @Override
+    public void deleteGoodsByIds(Long[] ids) {
+        //根据商品spu id数组更新商品spu 的isDelete属性值为1
+        //update tb_goods set is_delete='1' where id in(?,?...)
+        TbGoods goods = new TbGoods();
+        goods.setIsDelete("1");
+
+        Example example = new Example(TbGoods.class);
+        example.createCriteria().andIn("id",Arrays.asList(ids));
+
+        goodsMapper.updateByExampleSelective(goods,example);
     }
 
     /**
