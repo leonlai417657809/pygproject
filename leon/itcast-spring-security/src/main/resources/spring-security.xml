@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/security
+http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <!--不需要使用角色权限就可以访问的资源-->
+    <http pattern="/login.html" security="none"/>
+    <http pattern="/login_error.html" security="none"/>
+
+    <!--配置需要有角色权限才能访问的资源配置 use-expressions值为false的时候就不需要再写hasRole类似的表达式-->
+    <http use-expressions="false">
+        <!--拦截的资源及角色配置-->
+        <!--<intercept-url pattern="/**" access="hasRole('ROLE_USER')"/>-->
+        <intercept-url pattern="/**" access="ROLE_USER"/>
+
+        <!--配置登录的表单-->
+        <form-login login-page="/login.html" default-target-url="/index.html"
+                    authentication-failure-url="/login_error.html" always-use-default-target="true"/>
+
+        <!--禁止跨站请求访问-->
+        <csrf disabled="true"/>
+
+    </http>
+
+    <!--加密方式；不加密使用明文-->
+    <beans:bean id="passwordEncoder" class="org.springframework.security.crypto.password.NoOpPasswordEncoder"/>
+
+    <!--认证管理器-->
+    <authentication-manager>
+        <authentication-provider>
+            <password-encoder ref="passwordEncoder"/>
+            <user-service>
+                <!--用户名、角色、密码-->
+                <user name="itcast" authorities="ROLE_USER" password="123456"/>
+                <user name="admin" authorities="ROLE_USER" password="123456"/>
+            </user-service>
+        </authentication-provider>
+    </authentication-manager>
+</beans:beans>
