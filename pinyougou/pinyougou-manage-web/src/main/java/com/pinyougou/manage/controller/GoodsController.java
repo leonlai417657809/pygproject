@@ -3,11 +3,15 @@ package com.pinyougou.manage.controller;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.github.pagehelper.PageInfo;
 import com.pinyougou.pojo.TbGoods;
+import com.pinyougou.pojo.TbItem;
+import com.pinyougou.search.service.ItemSearchService;
 import com.pinyougou.sellergoods.service.GoodsService;
 import com.pinyougou.vo.Goods;
 import com.pinyougou.vo.Result;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequestMapping("/goods")
 @RestController
@@ -15,6 +19,9 @@ public class GoodsController {
 
     @Reference
     private GoodsService goodsService;
+
+    @Reference
+    private ItemSearchService itemSearchService;
 
     /**
      * 新增
@@ -82,6 +89,8 @@ public class GoodsController {
     public Result delete(Long[] ids){
         try {
             goodsService.deleteGoodsByIds(ids);
+            //删除搜索系统商品数据
+            itemSearchService.deleteItemByIds(ids);
             return Result.ok("删除成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -114,6 +123,12 @@ public class GoodsController {
     public Result updateStatus(String status,Long[] ids){
         try {
             goodsService.updateStatus(status,ids);
+            if("2".equals(status)){
+                //根据spu id数组查询其对应的启用状态的sku
+                List<TbItem> itemList = goodsService.findItemListByGoodsIds(ids);
+                //更新搜索系统数据
+                itemSearchService.importItemList(itemList);
+            }
             return Result.ok("提交更新成功");
         } catch (Exception e) {
             e.printStackTrace();

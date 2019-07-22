@@ -2,6 +2,7 @@ package com.pinyougou.sellergoods.service;
 
 import com.github.pagehelper.PageInfo;
 import com.pinyougou.pojo.TbGoods;
+import com.pinyougou.pojo.TbItem;
 import com.pinyougou.service.BaseService;
 import com.pinyougou.vo.Goods;
 
@@ -48,4 +49,11 @@ public interface GoodsService extends BaseService<TbGoods> {
      * @param ids 主键数组
      */
     void deleteGoodsByIds(Long[] ids);
+
+    /**
+     * 根据spu id数组查询其对应的启用状态的sku
+     * @param ids spu id数组
+     * @return sku商品列表
+     */
+    List<TbItem> findItemListByGoodsIds(Long[] ids);
 }
