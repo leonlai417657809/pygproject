@@ -43,10 +43,10 @@ http://www.springframework.org/schema/context/spring-context.xsd">
     </bean>
 
     <!--  引用 dubbo  服务  -->
-    <dubbo:application name="pinyougou-shop-web" >
+    <dubbo:application name="pinyougou-item-web" >
         <!--  不开启 qos ； qos 可通过指令动态调动提供的服务  -->
         <dubbo:parameter key="qos.enable" value="false"/>
     </dubbo:application>
     <dubbo:registry address="zookeeper://192.168.12.168:2181"/>
-    <dubbo:annotation package="com.pinyougou.shop.controller" />
+    <dubbo:annotation package="com.pinyougou.item" />
 </beans>

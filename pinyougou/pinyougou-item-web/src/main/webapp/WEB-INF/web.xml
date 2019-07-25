@@ -29,7 +29,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
         <!--  指定加载的配置文件 ，通过参数 contextConfigLocation 加载 -->
         <init-param>
             <param-name>contextConfigLocation</param-name>
-            <param-value>classpath:spring/springmvc.xml</param-value>
+            <param-value>classpath:spring/*.xml</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>

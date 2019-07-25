@@ -11,7 +11,7 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
     </listener>
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:spring/spring-security.xml</param-value>
+        <param-value>classpath:spring/spring-*.xml</param-value>
     </context-param>
 
     <!--  解决 post 乱码  -->
