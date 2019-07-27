@@ -1,0 +1,11 @@
+#修改tomcat端口
+server:
+  port: 9003
+#activemq的broker地址
+spring:
+  activemq:
+    broker-url: tcp://192.168.12.168:61616
+#在阿里申请的id
+accessKeyId: LTAIelDDzoS6knwh
+#在阿里申请的秘钥
+accessKeySecret: nxNnvS5YnmUjhd37QoT18hzMYJlVGf
