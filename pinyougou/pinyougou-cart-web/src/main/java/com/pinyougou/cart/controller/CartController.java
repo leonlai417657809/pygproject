@@ -50,6 +50,12 @@ public class CartController {
     @GetMapping("/addItemToCartList")
     public Result addItemToCartList(Long itemId, Integer num){
         try {
+            //可以设置响应头部属性
+            //设置允许可以跨域请求的域名
+            response.setHeader("Access-Control-Allow-Origin", "http://item.pinyougou.com");
+            //设置允许可以读取cookie中的数据
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+
             //获取当前登录的用户名；因为允许匿名访问，如果为匿名访问的时候用户名为anonymousUser
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
 

@@ -58,7 +58,7 @@ var app = new Vue({
             //如果没有找到匹配的，则默认如下：
             this.sku = {"id": 0, "title": "-----", "price": 0};
         },
-        //添加到购物车
+        //添加到购物车 withCredentials表示允许被读凭证信息（cookie）
         addToCart: function () {
             axios.get("http://cart.pinyougou.com/cart/addItemToCartList.do?itemId="
                 + this.sku.id + "&num=" + this.num, {"withCredentials": true})
