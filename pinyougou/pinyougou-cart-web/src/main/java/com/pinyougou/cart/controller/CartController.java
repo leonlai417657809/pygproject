@@ -9,6 +9,7 @@ import com.pinyougou.vo.Result;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,6 +41,7 @@ public class CartController {
     private CartService cartService;
 
     /**
+     * @CrossOrigin 允许某些域名可以跨域请求；origins表示具体的域名，allowCredentials设置运行读取cookie
      * 加入购物车
      * 未登录：将新购物车列表存入cookie
      * 已登录：将新购物车列表存入redis
@@ -48,13 +50,14 @@ public class CartController {
      * @return 操作结果
      */
     @GetMapping("/addItemToCartList")
+    @CrossOrigin(origins = "http://item.pinyougou.com", allowCredentials = "true")
     public Result addItemToCartList(Long itemId, Integer num){
         try {
-            //可以设置响应头部属性
+            /*//可以设置响应头部属性
             //设置允许可以跨域请求的域名
             response.setHeader("Access-Control-Allow-Origin", "http://item.pinyougou.com");
             //设置允许可以读取cookie中的数据
-            response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setHeader("Access-Control-Allow-Credentials", "true");*/
 
             //获取当前登录的用户名；因为允许匿名访问，如果为匿名访问的时候用户名为anonymousUser
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
