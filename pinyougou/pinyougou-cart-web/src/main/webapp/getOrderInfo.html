@@ -70,11 +70,12 @@
 							<li class="addr-item">
 							
 							  <div v-for="address in addressList">
-								  <div :class="['con','name',(selectedAddress==address)?'selected':'']">
-									  <a @click.prevent="selectAddress(address)" href="javascript:;" >{{address.contact}}<span title="点击取消选择">&nbsp;</span></a></div>
+								<div :class="['con','name',(selectedAddress==address)?'selected':'']">
+                                    <a @click.prevent="selectAddress(address)" href="javascript:;" >{{address.contact}}<span title="点击取消选择">&nbsp;</span></a></div>
 								<div class="con address">{{address.contact}} {{address.address}} <span>{{address.mobile}}</span>
 									<span v-show="address.isDefault=='1'" class="base">默认地址</span>
-									<span class="edittext"><a data-toggle="modal" data-target=".edit" data-keyboard="false" >编辑</a>&nbsp;&nbsp;<a href="javascript:;">删除</a></span>
+									<span class="edittext"><a data-toggle="modal" data-target=".edit" data-keyboard="false" >编辑</a>&nbsp;&nbsp;
+                                        <a href="javascript:;">删除</a></span>
 								</div>
 								<div class="clearfix"></div>
 							  </div>
@@ -177,7 +178,7 @@
 											<div class="price">￥{{orderItem.price.toFixed(2)}}</div>
 										</li>
 										<li class="yui3-u-1-12">
-											<div class="num">X{{orderItem.num}}</div>
+											<div class="num">X {{orderItem.num}}</div>
 										</li>
 										<li class="yui3-u-1-12">
 											<div class="exit">有货</div>
@@ -212,7 +213,7 @@
 		<div class="order-summary">
 			<div class="static fr">
 				<div class="list">
-					<span><i class="number">{{totalValue.totalNum}}</i>件商品，总商品金额</span>
+					<span><i class="number">{{totalValue.totalNum}} </i>件商品，总商品金额</span>
 					<em class="allprice">¥{{totalValue.totalMoney.toFixed(2)}}</em>
 				</div>
 				<div class="list">

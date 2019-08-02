@@ -16,31 +16,33 @@ import com.pinyougou.vo.Cart;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+@Transactional
 @Service
 public class OrderServiceImpl extends BaseServiceImpl<TbOrder> implements OrderService {
 
     @Autowired
     private OrderMapper orderMapper;
-
     @Autowired
     private OrderItemMapper orderItemMapper;
-
     @Autowired
     private PayLogMapper payLogMapper;
 
     @Autowired
     private RedisTemplate redisTemplate;
 
+    //品优购系统的购物车在redis中的键名
+    private static final String REDIS_CART_LIST = "CART_LIST";
+
     @Autowired
     private IdWorker idWorker;
 
-    //品优购系统的购物车在redis中的键名
-    private static final String REDIS_CART_LIST = "CART_LIST";
 
     @Override
     public PageInfo<TbOrder> search(Integer pageNum, Integer pageSize, TbOrder order) {
@@ -77,7 +79,7 @@ public class OrderServiceImpl extends BaseServiceImpl<TbOrder> implements OrderS
         double totalFee = 0;
 
         for (Cart cart : cartList) {
-        tbOrder = new TbOrder();
+            tbOrder = new TbOrder();
             //订单id
             orderId = idWorker.nextId()+"";
             tbOrder.setOrderId(orderId);
@@ -92,25 +94,31 @@ public class OrderServiceImpl extends BaseServiceImpl<TbOrder> implements OrderS
             tbOrder.setUpdateTime(tbOrder.getCreateTime());
             //订单状态：1、未付款，2、已付款，3、未发货，4、已发货，5、交易成功，6、交易关闭,7、待评价',
             tbOrder.setStatus("1");
+
             //本笔订单的总金额 = 所有该订单的订单商品的总金额之和
             double payment = 0;
-        //处理订单商品
-            for(TbOrderItem orderItem : cart.getOrderItemList()){
+
+            //处理订单商品
+            for (TbOrderItem orderItem : cart.getOrderItemList()) {
                 orderItem.setId(idWorker.nextId());
                 orderItem.setOrderId(orderId);
                 orderItemMapper.insertSelective(orderItem);
 
                 payment += orderItem.getTotalFee();
             }
+
             tbOrder.setPayment(payment);
+
             //累加订单号
-            if(orderIds.length()> 0){
-                orderIds += "," +orderId;
-            }else {
+            if (orderIds.length() > 0) {
+                orderIds += "," + orderId;
+            } else {
                 orderIds = orderId;
             }
+
             //累计本次交易的总金额
             totalFee += payment;
+
             //保存订单
             add(tbOrder);
         }
@@ -121,10 +129,10 @@ public class OrderServiceImpl extends BaseServiceImpl<TbOrder> implements OrderS
         tbPayLog.setUserId(order.getUserId());
         tbPayLog.setPayType(order.getPaymentType());
         tbPayLog.setCreateTime(new Date());
-        if("1".equals(order.getPaymentType())){
+        if ("1".equals(order.getPaymentType())) {
             //如果为微信支付 未支付0
             tbPayLog.setTradeState("0");
-        }else{
+        } else {
             //货到付款 支付状态为1，已支付
             tbPayLog.setTradeState("1");
             tbPayLog.setPayTime(new Date());
@@ -132,14 +140,47 @@ public class OrderServiceImpl extends BaseServiceImpl<TbOrder> implements OrderS
 
         //订单号
         tbPayLog.setOrderList(orderIds);
+
         //本次要支付的总金额 = 所有订单的金额之和；在电商开发中；如果涉及到金钱，那么字段一般情况下都需要使用整型；单位精确到分
-        tbPayLog.setTotalFee((long) (totalFee*100));
+        tbPayLog.setTotalFee((long)(totalFee*100));
 
         payLogMapper.insertSelective(tbPayLog);
+
         //4. 清空当前登录用户的购物车列表
         redisTemplate.boundHashOps(REDIS_CART_LIST).delete(order.getUserId());
-        //5. 返回支付日志id,即支付订单号id,如果是货到付款则支付状态为已支付
+        //5. 返回支付日志id
         return outTradeNo;
+    }
+
+    @Override
+    public TbPayLog findPayLogByOutTradeNo(String outTradeNo) {
+        return payLogMapper.selectByPrimaryKey(outTradeNo);
+    }
+
+    @Override
+    public void updateOrderStatus(String outTradeNo, String transactionId) {
+        TbPayLog payLog = findPayLogByOutTradeNo(outTradeNo);
+        //- 更新支付日志的支付状态为 已支付（1）
+        payLog.setTradeState("1");
+        payLog.setPayTime(new Date());
+        payLog.setTransactionId(transactionId);
+        payLogMapper.updateByPrimaryKeySelective(payLog);
+
+        //- 更新订单对应的支付状态为 已付款（2）
+        /**
+         * sql--> UPDATE tb_order SET STATUS = '2' WHERE order_id IN(?,?...)
+         */
+        String[] orderIds = payLog.getOrderList().split(",");
+
+        TbOrder order = new TbOrder();
+        order.setPaymentTime(new Date());
+        order.setUpdateTime(order.getPaymentTime());
+        order.setStatus("2");
+
+        Example example = new Example(TbOrder.class);
+        example.createCriteria().andIn("orderId", Arrays.asList(orderIds));
+        orderMapper.updateByExampleSelective(order, example);
+
     }
 
 }

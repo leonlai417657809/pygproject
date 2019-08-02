@@ -29,7 +29,7 @@ public class OrderController {
             //来源 1:app端，2：pc端，3：M端，4：微信端，5：手机qq端',
             String outTradeNo = orderService.addOrder(order);
 
-            return Result.ok("outTradeNo");
+            return Result.ok(outTradeNo);
         } catch (Exception e) {
             e.printStackTrace();
         }

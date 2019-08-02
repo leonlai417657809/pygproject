@@ -207,7 +207,7 @@
             },
             methods:{
                 getUsername: function () {
-                    axios.get("seckillGoods/getUsername.do").then(function (response) {
+                    axios.get("cart/getUsername.do").then(function (response) {
                         app.username = response.data.username;
                     });
                 },
